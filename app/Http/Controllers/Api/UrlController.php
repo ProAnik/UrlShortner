@@ -12,31 +12,38 @@ class UrlController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'original_url' => 'required|url'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'original_url' => 'required|url'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => 'Invalid URL'], 400);
+            if ($validator->fails()) {
+                return response()->json(['error' => 'Invalid URL'], 400);
+            }
+
+            $url = Url::create([
+                'original_url' => $request->original_url,
+                'short_url' => Url::generateShortUrl()
+            ]);
+
+            return response()->json(['short_url' => $url->short_url], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $url = Url::create([
-            'original_url' => $request->original_url,
-            'short_url' => Url::generateShortUrl()
-        ]);
-
-        return response()->json(['short_url' => $url->short_url], 201);
     }
 
     public function retrieve($shortUrl)
     {
-        $url = Url::where('short_url', $shortUrl)->pluck('original_url')->first();
+        try {
+            $url = Url::where('short_url', $shortUrl)->pluck('original_url')->first();
 
-        if (!$url) {
-            return response()->json(['error' => 'URL not found'], 404);
+            if (!$url) {
+                return response()->json(['error' => 'URL not found'], 404);
+            }
+            return response()->json(['original_url' => $url], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        return response()->json(['original_url' => $url], 201);
     }
 
 

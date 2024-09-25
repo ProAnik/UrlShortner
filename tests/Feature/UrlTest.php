@@ -9,6 +9,8 @@ use App\Models\Url;
 
 class UrlTest extends TestCase
 {
+    use RefreshDatabase;
+
 
     /**
      * A basic feature test example.
